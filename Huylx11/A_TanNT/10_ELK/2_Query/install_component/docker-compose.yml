@@ -1,0 +1,129 @@
+# version: '3.7'
+# services:
+#   es01:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+#     ports:
+#       - 9200:9200
+#       - 9300:9300
+#     environment:
+#       node.name: es01
+#       discovery.seed_hosts: es01,es02,es03
+#       cluster.initial_master_nodes: es01,es02,es03
+#       cluster.name: mycluster
+#       bootstrap.memory_lock: "true"
+#       ES_JAVA_OPTS: -Xms256m -Xmx256m
+#     volumes:
+#       - es-data-es01:/usr/share/elasticsearch/data
+#     ulimits:
+#       memlock:
+#         soft: -1
+#         hard: -1
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl http://localhost:9200"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 120
+#   es02:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+#     ports:
+#       - 9201:9200
+#       - 9301:9300
+#     environment:
+#       node.name: es02
+#       discovery.seed_hosts: es01,es02,es03
+#       cluster.initial_master_nodes: es01,es02,es03
+#       cluster.name: mycluster
+#       bootstrap.memory_lock: "true"
+#       ES_JAVA_OPTS: -Xms256m -Xmx256m
+#     volumes:
+#       - es-data-es02:/usr/share/elasticsearch/data
+#     ulimits:
+#       memlock:
+#         soft: -1
+#         hard: -1
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl http://localhost:9200"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 120
+#   es03:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+#     ports:
+#       - 9202:9200
+#       - 9303:9300
+#     environment:
+#       node.name: es03
+#       discovery.seed_hosts: es01,es02,es03
+#       cluster.initial_master_nodes: es01,es02,es03
+#       cluster.name: mycluster
+#       bootstrap.memory_lock: "true"
+#       ES_JAVA_OPTS: -Xms256m -Xmx256m
+#     volumes:
+#       - es-data-es03:/usr/share/elasticsearch/data
+#     ulimits:
+#       memlock:
+#         soft: -1
+#         hard: -1
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl http://localhost:9200"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 120
+#   kibana:
+#     image: docker.elastic.co/kibana/kibana:7.11.1
+#     container_name: kibana1
+#     depends_on:
+#       es01:
+#         condition: service_healthy
+#       es02:
+#         condition: service_healthy
+#       es03:
+#         condition: service_healthy
+#     ports:
+#       - 5601:5601
+#     environment:
+#       ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+#     healthcheck:
+#       test:
+#         [
+#           "CMD-SHELL",
+#           "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'",
+#         ]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 100
+#   filebeat:
+#     container_name: filebeat1
+#     image: docker.elastic.co/beats/filebeat:7.11.1
+#     command: "--strict.perms=False"
+#     depends_on:
+#       kibana:
+#         condition: service_healthy
+#     volumes:
+#       - filebeat:/usr/share/filebeat/data
+#       - ./filebeat-conf.yml:/usr/share/filebeat/filebeat.yml
+#   logstash:
+#     container_name: logstash1
+#     volumes:
+#       - logstashdata01:/usr/share/logstash/data
+#       - certs:/usr/share/logstash/certs
+#       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro 
+#     image: docker.elastic.co/logstash/logstash:7.11.1
+#     ports:
+#       - 5000:5000
+#     depends_on:   
+#       es01:
+#         condition: service_healthy
+#       es02:
+#         condition: service_healthy
+#       es03:
+#         condition: service_healthy
+#     volumes:
+#       - ./logstash-conf.yml: /usr/share/logstash/logstash/data
+#     environment:
+#       LS_JAVA_OPTS: -Xms256m -Xmx256m
+# volumes:
+#   es-data-es01:
+#   es-data-es02:
+#   es-data-es03:
+#   filebeat:

@@ -1,0 +1,11 @@
+# filebeat.config:
+#   modules:
+#     path: ${path.config}/modules.d/*.yml
+#     reload.enabled: false
+# setup.dashboards.enabled: true
+# setup.kibana:
+#    host: "kibana1:5601"   
+# output.elasticsearch:
+#   hosts: ["filebeat1:9200"]
+#   username: 'huy'
+#   password: '1'
